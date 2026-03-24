@@ -15,6 +15,7 @@ import { initUI } from './ui.js';
 
 const CARD_SPACING  = 185;
 const CARD_SPACING3 = 260;
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
 
 // Fallback positions used until the .glb is loaded (or if it fails to load).
 const FALLBACK_STOPS = {
@@ -32,7 +33,7 @@ export const SECTIONS = [
     index: 1, label: 'Research', stopName: 'stop-experience',
     cards: [
       {
-        id: 'earsim', type: 'video', videoSrc: 'media/earsim.mp4',
+        id: 'earsim', type: 'video', videoSrc: assetUrl('media/earsim.mp4'),
         title: 'EARSIM — VR Sound Localization',
         badge: 'SIGGRAPH 2025', badgeHref: 'https://dl.acm.org/doi/10.1145/3721250.3743041',
         meta: 'UBC Emerging Media Lab · Spring 2025',
@@ -42,7 +43,7 @@ export const SECTIONS = [
         col: -1,
       },
       {
-        id: 'ict', type: 'video', videoSrc: 'media/ict.mp4',
+        id: 'ict', type: 'video', videoSrc: assetUrl('media/ict.mp4'),
         title: 'LLM Dialogue Game — USC ICT',
         meta: 'USC Institute for Creative Technologies · Summer 2025',
         desc: 'Third-person Unreal Engine game with LLM-driven NPC dialogue applying Construal Level Theory — exploring persuasive AI in interactive game environments.',
@@ -65,7 +66,7 @@ export const SECTIONS = [
         col: -1,
       },
       {
-        id: 'shotcaller', type: 'video', videoSrc: 'media/shotcaller.mp4',
+        id: 'shotcaller', type: 'video', videoSrc: assetUrl('media/shotcaller.mp4'),
         title: 'Shot-caller', badge: 'SF Hackathon',
         desc: 'Built at a San Francisco hackathon. Description and demo coming soon.',
         tags: [],
@@ -98,9 +99,9 @@ export const SECTIONS = [
   {
     index: 4, label: '/ Library', stopName: 'stop-library',
     cards: [
-      { id: 'ski',   type: 'video', videoSrc: 'media/ski.mp4',   mediaLabel: 'Skiing · Whistler', isMedia: true, col: -1 },
-      { id: 'skate', type: 'video', videoSrc: 'media/skate.mp4', mediaLabel: 'Skating · SF',      isMedia: true, col:  0 },
-      { id: 'surf',  type: 'video', videoSrc: 'media/surf.mp4',  mediaLabel: 'Surfing',            isMedia: true, col: +1 },
+      { id: 'ski',   type: 'video', videoSrc: assetUrl('media/ski.mp4'),   mediaLabel: 'Skiing · Whistler', isMedia: true, col: -1 },
+      { id: 'skate', type: 'video', videoSrc: assetUrl('media/skate.mp4'), mediaLabel: 'Skating · SF',      isMedia: true, col:  0 },
+      { id: 'surf',  type: 'video', videoSrc: assetUrl('media/surf.mp4'),  mediaLabel: 'Surfing',            isMedia: true, col: +1 },
     ],
   },
 ];
@@ -375,7 +376,7 @@ function init() {
 
   // Load the Blender scene — async, non-blocking. Fallbacks work until it loads.
   new GLTFLoader().load(
-    'scene.glb',
+    assetUrl('scene.glb'),
     (gltf) => {
       const root = gltf.scene;
 
