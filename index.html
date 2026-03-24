@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mark Harmon — Graphics & Simulation Engineer</title>
+  <meta name="description" content="Physics graduate, graphics/simulation engineer." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- WebGL canvas — cloud atmosphere -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- CSS3D container — Three.js CSS3DRenderer mounts here -->
+  <div id="css3d-container"></div>
+
+  <!-- Hero overlay -->
+  <div id="hero-overlay">
+    <div class="hero-content">
+      <p class="hero-hello">Hello, I'm</p>
+      <h1 class="hero-name">Mark Harmon</h1>
+      <hr class="hero-rule" />
+      <p class="hero-subtitle">Physics · Graphics · Simulation</p>
+      <p class="hero-location">Based in California — Open to work</p>
+      <a href="https://linkedin.com/in/markharmon" class="hero-badge" target="_blank" rel="noopener">
+        Open to work ↗
+      </a>
+    </div>
+    <button class="hero-cta" id="hero-cta">
+      <span>Enter</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 3v10M8 13l4-4M8 13l-4-4" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Top nav -->
+  <header id="top-nav">
+    <button class="nav-home" id="nav-home">Mark Harmon</button>
+    <nav class="section-nav">
+      <button class="snav-btn" data-stop="1">Research</button>
+      <button class="snav-btn" data-stop="2">Hackathons</button>
+      <button class="snav-btn" data-stop="3">Projects</button>
+      <button class="snav-btn" data-stop="4">Library</button>
+    </nav>
+    <div class="nav-contact">
+      <a href="mailto:markharmon868@gmail.com">Email</a>
+      <a href="https://linkedin.com/in/markharmon"  target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/markharmon868"    target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </header>
+
+  <!-- Bottom nav -->
+  <div id="bottom-nav">
+    <button id="btn-prev" class="nav-arrow" disabled aria-label="Previous">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div id="nav-dots">
+      <button class="dot active" data-stop="0" aria-label="Intro"></button>
+      <button class="dot"        data-stop="1" aria-label="Experience"></button>
+      <button class="dot"        data-stop="2" aria-label="Hackathons"></button>
+      <button class="dot"        data-stop="3" aria-label="Projects"></button>
+      <button class="dot"        data-stop="4" aria-label="Library"></button>
+    </div>
+    <button id="btn-next" class="nav-arrow" aria-label="Next">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Section label -->
+  <div id="section-label"></div>
+
+  <!-- Single module entry point -->
+  <script type="module" src="/main.js"></script>
+
+</body>
+</html>

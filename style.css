@@ -1,0 +1,695 @@
+/* ─────────────────────────────────────────────────────────
+   RESET & TOKENS
+───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:            #08080e;
+  --card-bg:       rgba(8, 8, 18, 0.82);
+  --card-border:   rgba(255, 255, 255, 0.10);
+  --card-hover:    rgba(255, 255, 255, 0.18);
+  --text:          rgba(255, 255, 255, 0.92);
+  --text-mid:      rgba(255, 255, 255, 0.62);
+  --text-muted:    rgba(255, 255, 255, 0.38);
+  --text-dim:      rgba(255, 255, 255, 0.20);
+  --accent:        rgba(140, 190, 255, 0.88);
+  --accent-bg:     rgba(100, 160, 255, 0.10);
+  --accent-border: rgba(100, 160, 255, 0.28);
+  --font:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --nav-h:         54px;
+  --bottom-h:      60px;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; }
+button { font-family: var(--font); }
+
+/* ─────────────────────────────────────────────────────────
+   CANVAS LAYERS
+───────────────────────────────────────────────────────── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* CSS3D renderer container — Three.js injects its own div inside this */
+#css3d-container {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+
+/* Three.js CSS3DRenderer injects a div — make sure it fills the container */
+#css3d-container > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HERO OVERLAY
+───────────────────────────────────────────────────────── */
+#hero-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* pointer-events toggled by JS — starts as 'all' for hero interaction,
+     set to 'none' when leaving hero so cards underneath are clickable */
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.hero-hello {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.hero-name {
+  font-size: clamp(52px, 9vw, 96px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.0;
+  color: var(--text);
+  opacity: 0;
+}
+
+.hero-rule {
+  width: 32px;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.18);
+  margin: 2px 0;
+  opacity: 0;
+}
+
+.hero-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.10em;
+  opacity: 0;
+}
+
+.hero-location {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  opacity: 0;
+}
+
+.hero-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  letter-spacing: 0.05em;
+  transition: background 0.2s, border-color 0.2s;
+  opacity: 0;
+}
+.hero-badge:hover {
+  background: rgba(100,160,255,0.18);
+  border-color: rgba(100,160,255,0.5);
+}
+
+.hero-cta {
+  position: fixed;
+  bottom: calc(var(--bottom-h) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  opacity: 0;
+  animation: ctaFloat 3s ease-in-out infinite;
+}
+.hero-cta:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: var(--text);
+  background: rgba(255,255,255,0.04);
+}
+
+@keyframes ctaFloat {
+  0%,100% { transform: translateX(-50%) translateY(0);   }
+  50%      { transform: translateX(-50%) translateY(5px); }
+}
+
+/* ─────────────────────────────────────────────────────────
+   TOP NAV
+───────────────────────────────────────────────────────── */
+#top-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(8,8,14,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+#top-nav.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.nav-home {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.nav-home:hover { opacity: 0.65; }
+
+.section-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.snav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  padding: 5px 14px;
+  border-radius: 20px;
+  transition: color 0.15s, background 0.15s;
+}
+.snav-btn:hover  { color: var(--text); }
+.snav-btn.active { color: var(--text); background: rgba(255,255,255,0.07); }
+
+.nav-contact {
+  display: flex;
+  gap: 18px;
+}
+.nav-contact a {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+}
+.nav-contact a:hover { color: var(--text); }
+
+/* ─────────────────────────────────────────────────────────
+   BOTTOM NAV
+───────────────────────────────────────────────────────── */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  height: var(--bottom-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.nav-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(8,8,14,0.55);
+  backdrop-filter: blur(8px);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.nav-arrow:hover:not(:disabled) {
+  border-color: rgba(255,255,255,0.25);
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
+}
+.nav-arrow:disabled { opacity: 0.18; cursor: default; }
+
+#nav-dots { display: flex; gap: 7px; align-items: center; }
+
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.22);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, width 0.25s cubic-bezier(0.22,1,0.36,1), border-radius 0.25s;
+}
+.dot:hover  { background: rgba(255,255,255,0.5); }
+.dot.active {
+  background: rgba(255,255,255,0.88);
+  width: 20px;
+  border-radius: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   SECTION LABEL (floating, bottom-left)
+───────────────────────────────────────────────────────── */
+#section-label {
+  position: fixed;
+  bottom: calc(var(--bottom-h) + 10px);
+  left: 28px;
+  z-index: 40;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+#section-label.visible { opacity: 1; }
+
+/* ─────────────────────────────────────────────────────────
+   CSS3D CARDS  — styles for elements rendered in 3D world
+   These are regular DOM divs transformed by CSS3DRenderer
+───────────────────────────────────────────────────────── */
+.css3d-card {
+  width: 320px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  user-select: none;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  /* pointer-events needed for video/link interactions */
+  pointer-events: all;
+}
+
+.css3d-card:hover {
+  border-color: var(--card-hover);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.07) inset;
+}
+
+/* Card media area */
+.c3-media {
+  width: 100%;
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0,0,0,0.5);
+  flex-shrink: 0;
+}
+
+.c3-media canvas,
+.c3-media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.c3-media video { opacity: 0; transition: opacity 0.4s; }
+.c3-media video.loaded { opacity: 1; }
+
+/* Media overlay (play + label) */
+.c3-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+.c3-overlay-thumb {
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 12px 14px;
+  background: linear-gradient(transparent 30%, rgba(0,0,0,0.7));
+}
+
+.c3-play {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.88);
+  pointer-events: all;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.c3-play:hover { background: rgba(255,255,255,0.24); transform: scale(1.08); }
+
+/* Focus-mode overlay — holds close + link buttons in regular DOM */
+.focus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  pointer-events: none;
+}
+.focus-overlay > * {
+  pointer-events: all;
+}
+
+.focus-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.9);
+  font-size: 24px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, transform 0.15s;
+}
+.focus-close:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); }
+
+.focus-link {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: rgba(100, 160, 255, 0.15);
+  border: 1px solid rgba(100, 160, 255, 0.35);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, transform 0.15s;
+}
+.focus-link:hover { background: rgba(100, 160, 255, 0.25); transform: translateX(-50%) scale(1.04); }
+
+/* ─────────────────────────────────────────────────────────
+   LIBRARY CONTROLS — overlay for clip strip + arrows
+   (video plays on the focused 3D card itself)
+───────────────────────────────────────────────────────── */
+.library-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 999998;
+  pointer-events: none;
+}
+.library-controls > * {
+  pointer-events: all;
+}
+
+.library-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
+  font-size: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.library-arrow:hover { background: rgba(255,255,255,0.16); transform: translateY(-50%) scale(1.08); }
+.library-arrow--prev { left: 24px; }
+.library-arrow--next { right: 24px; }
+
+.library-strip {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.library-thumb {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.library-thumb:hover {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+}
+.library-thumb.active {
+  background: rgba(100, 160, 255, 0.15);
+  border-color: rgba(100, 160, 255, 0.4);
+  color: var(--accent);
+}
+
+.c3-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.c3-placeholder--motion {
+  background: linear-gradient(135deg, #090b16 0%, #111830 60%, #07090f 100%);
+}
+
+.c3-placeholder--fluid {
+  background: linear-gradient(135deg, #050e1a 0%, #081624 60%, #040a12 100%);
+  animation: fluidPulse 3s ease-in-out infinite alternate;
+}
+@keyframes fluidPulse {
+  from { filter: brightness(0.9); }
+  to   { filter: brightness(1.15); }
+}
+
+.c3-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.6);
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.c3-loading.gone { opacity: 0; }
+
+/* Card body */
+.c3-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+}
+
+.c3-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.c3-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.c3-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.c3-desc {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-mid);
+  flex: 1;
+}
+
+.c3-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.c3-link {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-top: 4px;
+  pointer-events: all;
+  cursor: pointer;
+}
+.c3-link:hover { opacity: 0.7; }
+.c3-link--muted { color: var(--text-dim); font-size: 11px; font-style: italic; }
+
+.tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.42);
+  border: 1px solid rgba(255,255,255,0.08);
+  letter-spacing: 0.02em;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+a.badge { pointer-events: all; cursor: pointer; }
+a.badge:hover { opacity: 0.75; }
+
+/* ── Media-only card (library) ── */
+.css3d-card.media-card .c3-media {
+  height: 340px;
+  border-radius: 16px;
+}
+.css3d-card.media-card {
+  width: 240px;
+  border: none;
+  background: transparent;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  backdrop-filter: none;
+}
+.css3d-card.media-card:hover {
+  box-shadow: 0 28px 70px rgba(0,0,0,0.65);
+}
+.media-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CURSOR DOT
+───────────────────────────────────────────────────────── */
+#cursor-dot {
+  position: fixed;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(140,190,255,0.7);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 12px rgba(140,190,255,0.45);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* ─────────────────────────────────────────────────────────
+   MOBILE
+───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Nav — hide links, keep compact */
+  .section-nav, .nav-contact { display: none; }
+  #top-nav { padding: 0 16px; }
+
+  /* Hero */
+  .hero-content { padding: 0 20px; }
+  .hero-name { font-size: 13vw; }
+
+  /* Library controls — keep arrows reachable */
+  .library-arrow--prev { left: 10px; }
+  .library-arrow--next { right: 10px; }
+  .library-strip { bottom: 14px; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────── */
+body.reduced-motion #bg-canvas { display: none; }
+body.reduced-motion { background: linear-gradient(160deg, #06060e 0%, #0c0c1c 100%); }
